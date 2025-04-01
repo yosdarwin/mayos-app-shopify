@@ -8,21 +8,28 @@ import {
   Button,
   ButtonGroup,
   Pagination,
+  TextField,
+  Page,
+  Layout,
 } from "@shopify/polaris";
 
 const ListProducts = () => {
   const [products, setProducts] = useState([]);
+  const [pageInfo, setPageInfo] = useState([]);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [hasPrevPage, setHasPrevPage] = useState(false);
-  const [cursor, setCursor] = useState(null);
-  const [cursorHistory, setCursorHistory] = useState([]); // Store history of cursors
+  const [startCursor, setStartCursor] = useState(null);
+  const [endCursor, setEndCursor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const breakpoint = useBreakpoints().smDown;
 
-  const fetchProducts = async (cursor = null) => {
+  const [inputSearch, setInputSearch] = useState("");
+
+  const fetchProducts = async (cursor = null, btnClick = "") => {
     try {
       const url = cursor
-        ? `/api/get-products?cursor=${cursor}`
+        ? `/api/get-products?cursor=${cursor}&btnClick=${btnClick}`
         : "/api/get-products";
       const response = await fetch(url, {
         method: "GET",
@@ -37,35 +44,16 @@ const ListProducts = () => {
 
       const data = await response.json();
       setProducts(data.data.products.edges);
-      setCursor(
-        data.data.products.edges[data.data.products.edges.length - 1]?.cursor ||
-          null
-      );
-      setHasNextPage(data.data.products.pageInfo.hasNextPage);
-
-      // Update cursor history
-      if (cursor) {
-        setCursorHistory((prevHistory) => {
-          const newHistory = [...prevHistory, cursor];
-          console.log("Updated cursorHistory (Next Page):", newHistory); // Debugging
-          return newHistory;
-        });
-      } else {
-        setCursorHistory([]); // Reset history when fetching the first page
-        console.log("Reset cursorHistory (First Page):", []); // Debugging
-      }
+      setPageInfo(data.data.products.pageInfo);
+      setStartCursor(data.data.products.pageInfo.startCursor);
+      setEndCursor(data.data.products.pageInfo.endCursor);
+      setLoading(false);
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
     }
   };
-
-  // Sync hasPrevPage with cursorHistory
-  useEffect(() => {
-    console.log("cursorHistory (useEffect):", cursorHistory); // Debugging
-    setHasPrevPage(cursorHistory.length > 0);
-  }, [cursorHistory]);
 
   // Fetch the first page of products on mount
   useEffect(() => {
@@ -74,30 +62,12 @@ const ListProducts = () => {
 
   // Load the next page of products
   const loadNextPage = () => {
-    if (cursor) {
-      setLoading(true);
-      fetchProducts(cursor);
-    }
+    fetchProducts(endCursor, "next");
   };
 
   // Load the previous page of products
   const loadPreviousPage = () => {
-    if (cursorHistory.length > 0) {
-      setLoading(true);
-
-      // Remove the last cursor from history (go back one page)
-      const previousCursors = [...cursorHistory];
-      previousCursors.pop(); // Remove the last cursor
-      const previousCursor =
-        previousCursors[previousCursors.length - 1] || null;
-
-      // Fetch products using the previous cursor
-      fetchProducts(previousCursor);
-
-      // Update cursor history
-      setCursorHistory(previousCursors);
-      console.log("Updated cursorHistory (Previous Page):", previousCursors); // Debugging
-    }
+    fetchProducts(startCursor, "prev");
   };
 
   const resourceName = {
@@ -146,38 +116,59 @@ const ListProducts = () => {
       </IndexTable.Cell>
     </IndexTable.Row>
   ));
-
+  if (loading) {
+    return <div>Loading...</div>;
+  }
   return (
-    <Card>
-      <IndexTable
-        condensed={useBreakpoints().smDown}
-        resourceName={resourceName}
-        itemCount={products.length}
-        headings={[
-          { title: "Title" },
-          { title: "Description" },
-          { title: "Image" },
-          { title: "Action" },
-        ]}
-        selectable={false}
-      >
-        {rowMarkup}
-      </IndexTable>
-      <Pagination
-        onPrevious={() => {
-          console.log("Previous");
-          loadPreviousPage();
-        }}
-        onNext={() => {
-          console.log("Next");
-          loadNextPage();
-        }}
-        type="table"
-        hasPrevious={hasPrevPage} // Enable "Previous" button if there's a previous page
-        hasNext={hasNextPage} // Enable "Next" button if there's a next page
-        label={`1-${products.length} of ${products.length} products`} // Use backticks for template literals
-      />
-    </Card>
+    <Page>
+      <Layout>
+        <Layout.Section>
+          <Grid>
+            <Grid.Cell columnSpan={{ xs: 8, lg: 10, xl: 10 }}>
+              <TextField
+                value={inputSearch}
+                onChange={(e) => setInputSearch(e.target.value)}
+                type="text"
+                placeholder="Type title product here..."
+              />
+            </Grid.Cell>
+            <Grid.Cell columnSpan={{ xs: 4, lg: 2, xl: 2 }}>
+              <Button variant="primary">Search</Button>
+            </Grid.Cell>
+          </Grid>
+        </Layout.Section>
+        <Layout.Section>
+          <Card>
+            <IndexTable
+              condensed={breakpoint}
+              resourceName={resourceName}
+              itemCount={products.length}
+              headings={[
+                { title: "Title" },
+                { title: "Description" },
+                { title: "Image" },
+                { title: "Action" },
+              ]}
+              selectable={false}
+            >
+              {rowMarkup}
+            </IndexTable>
+            <Pagination
+              onPrevious={() => {
+                loadPreviousPage();
+              }}
+              onNext={() => {
+                loadNextPage();
+              }}
+              type="table"
+              hasPrevious={pageInfo.hasPreviousPage}
+              hasNext={pageInfo.hasNextPage}
+              label={`1-${products.length} of ${products.length} products`}
+            />
+          </Card>
+        </Layout.Section>
+      </Layout>
+    </Page>
   );
 };
 

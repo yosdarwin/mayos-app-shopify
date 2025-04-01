@@ -151,49 +151,99 @@ Route::get('/api/get-products', function (Request $request) {
     $session = $request->get('shopifySession');
     $client = new Graphql($session->getShop(), $session->getAccessToken());
     $cursor = $request->query('cursor', null);
-
-    $query = '
-        query($cursor: String) {
-            products(first: 5, after: $cursor) {
-                edges {
-                node {
-                    id
-                    title
-                    handle
-                    description
-                    variants(first: 5) {
+    $btnClick = $request->query('btnClick', null);
+    if ($btnClick == 'next' || $btnClick == null) {
+        $query = '
+            query($cursor: String) {
+                products(first: 3, after: $cursor) {
                     edges {
-                        node {
+                    node {
                         id
-                        price
-                        compareAtPrice
-                        }
-                    }
-                    }
-                    media(first: 5) {
-                    edges {
-                        node {
-                        ... on MediaImage {
+                        title
+                        handle
+                        description
+                        variants(first: 5) {
+                        edges {
+                            node {
                             id
-                            image {
-                            url
-                            altText
+                            price
+                            compareAtPrice
                             }
                         }
-                        
+                        }
+                        media(first: 5) {
+                        edges {
+                            node {
+                            ... on MediaImage {
+                                id
+                                image {
+                                url
+                                altText
+                                }
+                            }
+                            
+                            }
+                        }
                         }
                     }
+                    
+                    }
+                    pageInfo {
+                    hasPreviousPage
+                    hasNextPage
+                    startCursor
+                    endCursor
                     }
                 }
-                cursor
                 }
-                pageInfo {
-                hasPreviousPage
-                hasNextPage
+        ';
+    }
+    if ($btnClick == 'prev') {
+        $query = '
+            query($cursor: String) {
+                products(last: 3, before: $cursor) {
+                    edges {
+                    node {
+                        id
+                        title
+                        handle
+                        description
+                        variants(first: 5) {
+                        edges {
+                            node {
+                            id
+                            price
+                            compareAtPrice
+                            }
+                        }
+                        }
+                        media(first: 5) {
+                        edges {
+                            node {
+                            ... on MediaImage {
+                                id
+                                image {
+                                url
+                                altText
+                                }
+                            }
+
+                            }
+                        }
+                        }
+                    }
+
+                    }
+                    pageInfo {
+                    hasPreviousPage
+                    hasNextPage
+                    startCursor
+                    endCursor
+                    }
                 }
-            }
-            }
-    ';
+                }
+        ';
+    }
     $response = $client->query([
         'query' => $query,
         'variables' => [

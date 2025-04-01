@@ -8,13 +8,8 @@ const Products = () => {
       <TitleBar title="Products">
         <button variant="primary">Add New Product</button>
       </TitleBar>
-      <Page>
-        <Layout>
-          <Layout.Section>
-            <ListProducts />
-          </Layout.Section>
-        </Layout>
-      </Page>
+
+      <ListProducts />
     </>
   );
 };
