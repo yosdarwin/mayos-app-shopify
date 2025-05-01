@@ -1,0 +1,27 @@
+<a
+  href="{{ block.settings.url }}"
+  class="custom-price"
+  style="background-color: {{ block.settings.bg_color }}; padding: {{ block.settings.padding }};color: {{ block.settings.text_color }}; border-radius: 10px;"
+  {% if block.settings.open_in_new_tab %}
+    target="_blank"
+  {% endif %}
+>
+  {{ block.settings.label }}
+</a>
+{% schema %}
+{
+  "name": "Custom Price",
+  "target": "section",
+  "settings": [
+    { "type": "text", "id": "label", "label": "Label", "default": "Custom Request Price" },
+    { "type": "text", "id": "url", "label": "url", "default": "mailto:yosdarwin.dev@gmail.com" },
+    { "type": "color", "id": "bg_color", "label": "Background Colour", "default": "#000" },
+    { "type": "color", "id": "text_color", "label": "Text Colour", "default": "#fff" },
+    { "type": "text", "id": "padding", "label": "Padding", "default": "10px 20px" },
+    { "type": "checkbox", "id": "open_in_new_tab", "label": "Open in new tab", "default": true }
+  ],
+  "enabled_on": {
+    "templates": ["product"]
+  }
+}
+{% endschema %}
