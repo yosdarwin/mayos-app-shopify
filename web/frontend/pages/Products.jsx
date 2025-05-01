@@ -5,10 +5,8 @@ import { TitleBar } from "@shopify/app-bridge-react";
 const Products = () => {
   return (
     <>
-      <TitleBar title="Products">
-        <button variant="primary">Add New Product</button>
+      <TitleBar title="Products">        
       </TitleBar>
-
       <ListProducts />
     </>
   );

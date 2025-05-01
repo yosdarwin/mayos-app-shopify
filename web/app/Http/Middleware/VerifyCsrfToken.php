@@ -16,5 +16,10 @@ class VerifyCsrfToken extends Middleware
         'api/products',
         'api/graphql',
         'api/webhooks',
+        'api/add-product',
+        'api/test-add-product',
+        'api/delete-product',
+        'api/update-product',
+        'api/test-update-product'
     ];
 }

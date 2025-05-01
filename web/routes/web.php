@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\ShopifyProductCreatorException;
+use App\Http\Controllers\MyProductController;
 use App\Lib\AuthRedirection;
 use App\Lib\EnsureBilling;
 use App\Lib\ProductCreator;
@@ -152,10 +153,13 @@ Route::get('/api/get-products', function (Request $request) {
     $client = new Graphql($session->getShop(), $session->getAccessToken());
     $cursor = $request->query('cursor', null);
     $btnClick = $request->query('btnClick', null);
+    $keyword = $request->query('search', null);
+    $perPage = (int)$request->query('perPage', 3); // Default to 3 items per page if not specified
+
     if ($btnClick == 'next' || $btnClick == null) {
         $query = '
-            query($cursor: String) {
-                products(first: 3, after: $cursor) {
+            query($cursor: String, $perPage: Int!) {
+                products(first: $perPage, after: $cursor, query: "' . $keyword . '") {
                     edges {
                     node {
                         id
@@ -181,12 +185,12 @@ Route::get('/api/get-products', function (Request $request) {
                                 altText
                                 }
                             }
-                            
+
                             }
                         }
                         }
                     }
-                    
+
                     }
                     pageInfo {
                     hasPreviousPage
@@ -195,13 +199,13 @@ Route::get('/api/get-products', function (Request $request) {
                     endCursor
                     }
                 }
-                }
+            }
         ';
     }
     if ($btnClick == 'prev') {
         $query = '
-            query($cursor: String) {
-                products(last: 3, before: $cursor) {
+            query($cursor: String, $perPage: Int!) {
+                products(last: $perPage, before: $cursor, query: "' . $keyword . '") {
                     edges {
                     node {
                         id
@@ -248,8 +252,46 @@ Route::get('/api/get-products', function (Request $request) {
         'query' => $query,
         'variables' => [
             'cursor' => $cursor,
+            'perPage' => $perPage,
         ],
     ]);
     $data = $response->getDecodedBody();
     return response()->json($data);
 })->middleware('shopify.auth');
+
+Route::post('/api/add-product', [MyProductController::class, 'addProduct'])->middleware('shopify.auth');
+Route::post('/api/update-product', [MyProductController::class, 'updateProduct'])->middleware('shopify.auth');
+
+// Test route for updating products (for development only)
+Route::post('/api/test-update-product', function (Request $request) {
+    return app(MyProductController::class)->updateProduct($request);
+});
+
+// Get store information
+Route::get('/api/store-info', function (Request $request) {
+    /** @var AuthSession */
+    $session = $request->get('shopifySession'); // Provided by the shopify.auth middleware, guaranteed to be active
+
+    $client = new Graphql($session->getShop(), $session->getAccessToken());
+    $query = '{
+        shop {
+            name
+            email
+            myshopifyDomain
+            primaryDomain {
+                url
+            }
+        }
+    }';
+
+    $response = $client->query($query);
+    $data = $response->getDecodedBody();
+
+    return response()->json($data);
+})->middleware('shopify.auth');
+
+// Get existing products from database
+Route::get('/api/existing-products', [MyProductController::class, 'getExistingProducts'])->middleware('shopify.auth');
+
+// Delete product from database (using POST for better compatibility)
+Route::post('/api/delete-product', [MyProductController::class, 'deleteProduct'])->middleware('shopify.auth');
