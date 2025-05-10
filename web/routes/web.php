@@ -262,11 +262,6 @@ Route::get('/api/get-products', function (Request $request) {
 Route::post('/api/add-product', [MyProductController::class, 'addProduct'])->middleware('shopify.auth');
 Route::post('/api/update-product', [MyProductController::class, 'updateProduct'])->middleware('shopify.auth');
 
-// Test route for updating products (for development only)
-Route::post('/api/test-update-product', function (Request $request) {
-    return app(MyProductController::class)->updateProduct($request);
-});
-
 // Get store information
 Route::get('/api/store-info', function (Request $request) {
     /** @var AuthSession */
@@ -295,3 +290,6 @@ Route::get('/api/existing-products', [MyProductController::class, 'getExistingPr
 
 // Delete product from database (using POST for better compatibility)
 Route::post('/api/delete-product', [MyProductController::class, 'deleteProduct'])->middleware('shopify.auth');
+
+// Get Desc product - no auth middleware so it can be accessed from the theme
+Route::get('/api/desc-product/{id}', [MyProductController::class, 'getDescProduct']);

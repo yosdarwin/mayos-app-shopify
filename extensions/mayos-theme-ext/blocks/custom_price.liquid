@@ -1,24 +1,56 @@
-<a
-  href="{{ block.settings.url }}"
-  class="custom-price"
-  style="background-color: {{ block.settings.bg_color }}; padding: {{ block.settings.padding }};color: {{ block.settings.text_color }}; border-radius: 10px;"
-  {% if block.settings.open_in_new_tab %}
-    target="_blank"
-  {% endif %}
+<div
+  class="prodDesc-container"
+  style="background-color: {{ block.settings.bg_color }}; color: {{ block.settings.text_color }}; padding: {{ block.settings.padding }}; border-radius: {{ block.settings.border_radius}} "
 >
-  {{ block.settings.label }}
-</a>
+  <div class="prodDesc">Loading...</div>
+</div>
+<script>
+  const CustomDesc = async () => {
+    try {
+      // Get product ID from the current page
+      const productId = {{ product.id }};
+      const descElement = document.querySelector('.prodDesc');
+      // For development environment
+      const apiUrl = "http://127.0.0.1:62715/api/desc-product/" + productId;
+
+
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        console.error('Error fetching description:', response.status);
+        descElement.innerHTML = 'No custom description available';
+      }
+
+      const data = await response.json();
+
+
+      // Check if data exists and has description
+      if (data.data.description) {
+        descElement.innerHTML = data.data.description;
+      } else {
+        descElement.innerHTML = 'No custom description available for this product';
+      }
+    } catch (error) {
+      console.error('Failed to fetch description:', error);
+      descElement.innerHTML = 'No custom description available';
+    }
+  };
+  CustomDesc()
+</script>
 {% schema %}
 {
-  "name": "Custom Price",
+  "name": "Custom Desc",
   "target": "section",
   "settings": [
-    { "type": "text", "id": "label", "label": "Label", "default": "Custom Request Price" },
-    { "type": "text", "id": "url", "label": "url", "default": "mailto:yosdarwin.dev@gmail.com" },
     { "type": "color", "id": "bg_color", "label": "Background Colour", "default": "#000" },
     { "type": "color", "id": "text_color", "label": "Text Colour", "default": "#fff" },
     { "type": "text", "id": "padding", "label": "Padding", "default": "10px 20px" },
-    { "type": "checkbox", "id": "open_in_new_tab", "label": "Open in new tab", "default": true }
+    { "type": "text", "id": "border_radius", "label": "Radius", "default": "8px" }
   ],
   "enabled_on": {
     "templates": ["product"]

@@ -40,7 +40,8 @@ const ListProducts = () => {
   const [editFormData, setEditFormData] = useState({
     id: '',
     product_id: '',
-    name_store: ''
+    name_store: '',
+    description: ''
   });
 
   const [inputSearch, setInputSearch] = useState("");
@@ -115,7 +116,7 @@ const ListProducts = () => {
       const data = await response.json();
       if (data.success) {
         setExistingProducts(data.data);
-      }
+      } 
     } catch (error) {
       console.error('Error fetching existing products:', error);
     }
@@ -190,7 +191,8 @@ const handleAddProduct = async (productId) => {
       },
       body: JSON.stringify({
         product_id: productId,
-        name_store: storeName
+        name_store: storeName,
+        description: ''
       }),
     });
 
@@ -236,7 +238,8 @@ const handleEditModalClose = () => {
   setEditFormData({
     id: '',
     product_id: '',
-    name_store: ''
+    name_store: '',
+    description: ''
   });
 };
 
@@ -249,7 +252,8 @@ const showEditForm = (productId) => {
     setEditFormData({
       id: product.id,
       product_id: product.product_id,
-      name_store: storeName
+      name_store: storeName,
+      description: product.description
     });
     setEditModalActive(true);
   }
@@ -397,15 +401,15 @@ const handleDeleteProduct = async () => {
         <IndexTable.Cell>
           <ButtonGroup>
             {/* Only show Add button if product doesn't exist in database */}
-            {!existingProducts.some(item => item.product_id === product.node.id) && (
-              <Button onClick={() => handleAddProduct(product.node.id)} variant="primary" tone="success">Add</Button>
+            {!existingProducts.some(item => item.product_id === product.node.id.split('/').pop()) && (
+              <Button onClick={() => handleAddProduct(product.node.id.split('/').pop())} variant="primary" tone="success">Add</Button>
             )}
-            {existingProducts.some(item => item.product_id === product.node.id) && (
-              <Button onClick={() => showEditForm(product.node.id)} variant="primary">Edit</Button>
+            {existingProducts.some(item => item.product_id === product.node.id.split('/').pop()) && (
+              <Button onClick={() => showEditForm(product.node.id.split('/').pop())} variant="primary">Edit</Button>
             )}
             {/* Only show Delete button if product exists in database */}
-            {existingProducts.some(item => item.product_id === product.node.id) && (
-              <Button onClick={() => confirmDelete(product.node.id)} variant="primary" tone="critical">Delete</Button>
+            {existingProducts.some(item => item.product_id === product.node.id.split('/').pop()) && (
+              <Button onClick={() => confirmDelete(product.node.id.split('/').pop())} variant="primary" tone="critical">Delete</Button>
             )}
           </ButtonGroup>
         </IndexTable.Cell>
@@ -486,6 +490,15 @@ const handleDeleteProduct = async () => {
               label="Store Name"
               value={editFormData.name_store}
               onChange={(value) => handleEditFormChange('name_store', value)}
+              autoComplete="off"
+            />
+          </Layout.Section>
+          <Layout.Section>
+            <TextField 
+              multiline={4}
+              label="Description"
+              value={editFormData.description ? editFormData.description : ''}
+              onChange={(value) => handleEditFormChange('description', value)}
               autoComplete="off"
             />
           </Layout.Section>

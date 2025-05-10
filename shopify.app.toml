@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "1bb749f43aa4b82421671153edf1eaf1"
-application_url = "https://warren-modules-epson-quebec.trycloudflare.com"
+application_url = "https://inappropriate-calvin-gmbh-george.trycloudflare.com"
 embedded = true
 name = "mayos-test"
 handle = "mayos-test"
@@ -18,9 +18,9 @@ direct_api_mode = "online"
 
 [auth]
 redirect_urls = [
-  "https://warren-modules-epson-quebec.trycloudflare.com/auth/callback",
-  "https://warren-modules-epson-quebec.trycloudflare.com/auth/shopify/callback",
-  "https://warren-modules-epson-quebec.trycloudflare.com/api/auth/callback"
+  "https://inappropriate-calvin-gmbh-george.trycloudflare.com/auth/callback",
+  "https://inappropriate-calvin-gmbh-george.trycloudflare.com/auth/shopify/callback",
+  "https://inappropriate-calvin-gmbh-george.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

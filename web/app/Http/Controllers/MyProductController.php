@@ -13,6 +13,7 @@ class MyProductController extends Controller
         $validator = Validator::make($request->all(), [
             'product_id' => 'required|string',
             'name_store' => 'required|string',
+            'description' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -44,7 +45,7 @@ class MyProductController extends Controller
         $validator = Validator::make($request->all(), [
             'product_id' => 'required|string',
             'name_store' => 'required|string',
-            'id' => 'required|integer'
+            'description' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -65,6 +66,7 @@ class MyProductController extends Controller
             // Update product in local database
             $product->product_id = $request->input('product_id');
             $product->name_store = $request->input('name_store');
+            $product->description = $request->input('description');
             $product->save();
 
             // Return success response
@@ -127,6 +129,33 @@ class MyProductController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete product',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Get desc product
+    public function getDescProduct(Request $request, $id)
+    {
+        try {
+            // Find product by Shopify product_id in your database
+            $product = Product::where('product_id', $id)->first();
+
+            if (!$product) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Product not found in database'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $product
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching product description',
                 'error' => $e->getMessage()
             ], 500);
         }
