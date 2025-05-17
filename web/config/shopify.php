@@ -18,11 +18,11 @@ return [
     |
     */
     "billing" => [
-        "required" => false,
+        "required" => true,
 
         // Example set of values to create a charge for $5 one time
-        "chargeName" => "My Shopify App One-Time Billing",
-        "amount" => 5.0,
+        "chargeName" => "Mayos App One-Time Billing",
+        "amount" => 1.0,
         "currencyCode" => "USD", // Currently only supports USD
         "interval" => EnsureBilling::INTERVAL_ONE_TIME,
     ],

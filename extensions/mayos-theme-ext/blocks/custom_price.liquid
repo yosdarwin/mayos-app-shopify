@@ -11,8 +11,7 @@
       const productId = {{ product.id }};
       const descElement = document.querySelector('.prodDesc');
       // For development environment
-      const apiUrl = "http://127.0.0.1:62715/api/desc-product/" + productId;
-
+      const apiUrl = "/apps/mayos/desc-product/" + productId;
 
       const response = await fetch(apiUrl, {
         method: 'GET',

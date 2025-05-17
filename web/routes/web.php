@@ -292,4 +292,4 @@ Route::get('/api/existing-products', [MyProductController::class, 'getExistingPr
 Route::post('/api/delete-product', [MyProductController::class, 'deleteProduct'])->middleware('shopify.auth');
 
 // Get Desc product - no auth middleware so it can be accessed from the theme
-Route::get('/api/desc-product/{id}', [MyProductController::class, 'getDescProduct']);
+Route::get('/api/proxy/desc-product/{id}', [MyProductController::class, 'getDescProduct'])->middleware('auth.proxy');
